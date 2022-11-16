@@ -23,7 +23,22 @@ function createSetter() {
 }
 const set = createSetter();
 
+// has时没有触发getter
+function has (target: Target, key: string ) {
+  const res = Reflect.has(target, key);
+  track(target, key);
+  return res;
+}
+// delete property时没有触发setter
+function deleteProperty(target: Target, key: string){
+  const res = Reflect.deleteProperty(target, key);
+  trigger(target);
+  return res;
+}
+
 export const mutableHandlers: ProxyHandler<object> =  {
   get,
   set,
+  deleteProperty,
+  has,
 }

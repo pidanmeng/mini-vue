@@ -7,6 +7,6 @@ function createReactiveObject(target: Target, baseHandler: ProxyHandler<any>) {
   return proxy;
 }
 
-export function reactive(target: Target) {
+export function reactive<T extends object>(target: T):T {
   return createReactiveObject(target, mutableHandlers);
 }

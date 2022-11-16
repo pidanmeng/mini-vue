@@ -1,10 +1,10 @@
-import { Target } from "./reactive";
+import { Target } from './reactive';
 
 let activeEffect: ReactiveEffect | undefined;
 export let shouldTrack: boolean = true;
 
 class ReactiveEffect<T = any> {
-  deps: Dep[] = []
+  deps: Dep[] = [];
   constructor(public fn: () => T) {
     return;
   }
@@ -23,6 +23,10 @@ export interface ReactiveEffectOptions {
   lazy?: boolean;
 }
 
+export interface ReactiveEffectRunner<T = any> {
+  (): T;
+  effect: ReactiveEffect;
+}
 /**
  * 创建ReactiveEffect对象，并返回其runner
  */
@@ -31,6 +35,9 @@ export function effect<T = any>(fn: () => T, options?: ReactiveEffectOptions) {
   if (!options || !options.lazy) {
     _effect.run();
   }
+  const runner = _effect.run.bind(_effect) as ReactiveEffectRunner;
+  runner.effect = _effect;
+  return runner;
 }
 
 type Dep = Set<any>;
@@ -43,13 +50,13 @@ export function track(target: object, key: unknown) {
   if (shouldTrack && activeEffect) {
     // 获取depsMap - 一个响应式对象对应最多一个depsMap
     let depsMap = targetMap.get(target);
-    if(!depsMap) {
+    if (!depsMap) {
       targetMap.set(target, (depsMap = new Map()));
     }
     // 获取dep - 响应式对象的每个key 对应最多一个 effect 数组(dep)
     let dep = depsMap.get(key);
-    if(!dep) {
-      depsMap.set(key, ( dep = new Set([]) ));
+    if (!dep) {
+      depsMap.set(key, (dep = new Set([])));
     }
     trackEffect(dep);
   }
@@ -69,12 +76,12 @@ export function trackEffect(dep: Dep) {
 export function trigger(target: Target) {
   const depsMap = targetMap.get(target);
   let deps: (Dep | undefined)[] = [];
-  if(depsMap) {
-    deps = [ ...depsMap.values() ];
+  if (depsMap) {
+    deps = [...depsMap.values()];
   }
   const effects: ReactiveEffect[] = [];
   for (const dep of deps) {
-    if(dep) {
+    if (dep) {
       effects.push(...dep);
     }
   }

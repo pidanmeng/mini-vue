@@ -1,10 +1,14 @@
 import { track, trigger } from "./effect";
-import { Target } from "./reactive";
+import { reactive, Target } from "./reactive";
+import {isObject} from "shared";
 
 function createGetter(isReadonly = false) {
   return function get (target: Target, key: string, receiver: Object) {
     const res = Reflect.get(target, key, receiver);
     track(target, key);
+    if(isObject(res)) {
+      return reactive(res);
+    }
     return res;
   }
 }

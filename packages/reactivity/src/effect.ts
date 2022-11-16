@@ -1,3 +1,4 @@
+import { extend } from 'shared';
 import { Target } from './reactive';
 
 let activeEffect: ReactiveEffect | undefined;
@@ -5,7 +6,10 @@ export let shouldTrack: boolean = true;
 
 class ReactiveEffect<T = any> {
   deps: Dep[] = [];
-  constructor(public fn: () => T) {
+  constructor(
+    public fn: () => T,
+    public scheduler: EffectScheduler | null = null
+  ) {
     return;
   }
   run() {
@@ -19,8 +23,11 @@ class ReactiveEffect<T = any> {
   }
 }
 
+type EffectScheduler = (...args: any[]) => any;
+
 export interface ReactiveEffectOptions {
   lazy?: boolean;
+  scheduler?: EffectScheduler;
 }
 
 export interface ReactiveEffectRunner<T = any> {
@@ -32,6 +39,9 @@ export interface ReactiveEffectRunner<T = any> {
  */
 export function effect<T = any>(fn: () => T, options?: ReactiveEffectOptions) {
   const _effect = new ReactiveEffect(fn);
+  if (options) {
+    extend(_effect, options);
+  }
   if (!options || !options.lazy) {
     _effect.run();
   }
@@ -93,6 +103,10 @@ export function trigger(target: Target) {
  */
 export function triggerEffects(effects: ReactiveEffect[]) {
   for (const effect of effects) {
-    effect.run?.();
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }

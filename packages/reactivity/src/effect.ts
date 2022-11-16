@@ -5,7 +5,10 @@ let activeEffect: ReactiveEffect | undefined;
 export let shouldTrack: boolean = true;
 
 class ReactiveEffect<T = any> {
+  active = true;
   deps: Dep[] = [];
+
+  onStop?: () => void;
   constructor(
     public fn: () => T,
     public scheduler: EffectScheduler | null = null
@@ -21,6 +24,29 @@ class ReactiveEffect<T = any> {
     }
     return this.fn();
   }
+  stop() {
+    if (this.active) {
+      cleanupEffect(this);
+      if (this.onStop) {
+        this.onStop();
+      }
+      this.active = false;
+    }
+  }
+}
+
+function cleanupEffect(effect: ReactiveEffect) {
+  const { deps } = effect;
+  if (deps.length) {
+    for (let i = 0; i < deps.length; i++) {
+      deps[i].delete(effect);
+    }
+    deps.length = 0;
+  }
+}
+
+export function stop(runner: ReactiveEffectRunner) {
+  return runner.effect.stop();
 }
 
 type EffectScheduler = (...args: any[]) => any;

@@ -22,7 +22,9 @@ class ReactiveEffect<T = any> {
     } catch (e) {
       console.warn(e);
     }
-    return this.fn();
+    const result = this.fn();
+    shouldTrack = false;
+    return result;
   }
   stop() {
     if (this.active) {

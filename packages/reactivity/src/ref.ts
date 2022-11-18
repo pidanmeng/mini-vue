@@ -9,6 +9,7 @@ export function ref(val: any) {
 class RefImpl<T> {
   private _value: T;
   private dep: Dep = new Set();
+  public readonly __v_isRef: boolean = true;
   constructor(value: T) {
     this._value = isObject(value) ? reactive(value) : value;
   }
@@ -23,4 +24,12 @@ class RefImpl<T> {
     this._value = val;
     triggerEffects(this.dep);
   }
+}
+
+export function isRef(val: any) {
+  return !!(val && val.__v_isRef);
+}
+
+export function unref(val: any) {
+  return isRef(val) ? val.value : val;
 }

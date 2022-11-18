@@ -4,7 +4,7 @@ import { Target } from './reactive';
 let activeEffect: ReactiveEffect | undefined;
 export let shouldTrack: boolean = true;
 
-class ReactiveEffect<T = any> {
+export class ReactiveEffect<T = any> {
   active = true;
   deps: Dep[] = [];
 
@@ -78,7 +78,7 @@ export function effect<T = any>(fn: () => T, options?: ReactiveEffectOptions) {
   return runner;
 }
 
-type Dep = Set<any>;
+export type Dep = Set<any>;
 type KeyToDepMap = Map<any, Dep>;
 const targetMap = new WeakMap<any, KeyToDepMap>();
 /**
@@ -104,8 +104,10 @@ export function track(target: object, key: unknown) {
  * 将activeEffect作为依赖收集到特定的dep中
  */
 export function trackEffect(dep: Dep) {
-  dep.add(activeEffect);
-  activeEffect!.deps.push(dep);
+  if (activeEffect) {
+    dep.add(activeEffect);
+    activeEffect!.deps.push(dep);
+  }
 }
 
 /**
@@ -129,7 +131,7 @@ export function trigger(target: Target) {
 /**
  * 触发Effect对应的所有依赖
  */
-export function triggerEffects(effects: ReactiveEffect[]) {
+export function triggerEffects(effects: Dep | ReactiveEffect[]) {
   for (const effect of effects) {
     if (effect.scheduler) {
       effect.scheduler();

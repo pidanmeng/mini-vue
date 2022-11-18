@@ -1,4 +1,4 @@
-import { effect, isRef, ref, unref } from '../src';
+import { effect, isRef, proxyRefs, ref, unref } from '../src';
 
 describe('reactivity/ref', () => {
   it('should hold a value', () => {
@@ -39,11 +39,30 @@ describe('reactivity/ref', () => {
     expect(dummy).toBe(2);
   });
 
-  test('unref', () => {
+  it('unref', () => {
     const dummy = ref(1);
     expect(isRef(1)).toBe(false);
     expect(isRef(dummy)).toBe(true);
     expect(unref(1)).toBe(1);
     expect(unref(ref(1))).toBe(1);
+  });
+
+  it('proxyRefs', () => {
+    const dummy = {
+      foo: ref(1),
+      bar: 'foobar',
+    };
+    const proxyDummy = proxyRefs(dummy);
+    expect(dummy.foo.value).toBe(1);
+    expect(proxyDummy.foo).toBe(1);
+    expect(proxyDummy.bar).toBe('foobar');
+
+    proxyDummy.foo++;
+    expect(proxyDummy.foo).toBe(2);
+    expect(dummy.foo.value).toBe(2);
+
+    proxyDummy.foo = ref(3)
+    expect(proxyDummy.foo).toBe(3);
+    expect(dummy.foo.value).toBe(3);
   });
 });

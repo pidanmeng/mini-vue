@@ -38,7 +38,7 @@ const shallowUnwrapHandlers: ProxyHandler<any> = {
   get: (target, key) => unref(Reflect.get(target, key)),
   set: (target, key, value) => {
     const oldValue = target[key];
-    if (isRef(oldValue) && isRef(value)) {
+    if (isRef(oldValue) && !isRef(value)) {
       oldValue.value = value;
       return true;
     } else {

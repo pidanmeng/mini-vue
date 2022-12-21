@@ -36,10 +36,17 @@ function mountElement(vnode: any, container: any) {
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
   } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-    mountChildren(vnode, container);
+    mountChildren(vnode, el);
   }
   for (const attr in props) {
-    el.setAttribute(attr, vnode.props[attr]);
+    const val = props[attr];
+    const isOn = (key: string) => /^on[A-Z]/.test(key);
+    if (isOn(attr)) {
+      const event = attr.slice(2).toLowerCase();
+      el.addEventListener(event, val);
+    } else {
+      el.setAttribute(attr, vnode.props[attr]);
+    }
   }
   container.append(el);
 }

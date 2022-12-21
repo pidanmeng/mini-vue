@@ -41,7 +41,6 @@ function generateCommand(command, options) {
 function buildAllPackages() {
   const projects = getProjectsList()
   for (const packageName of projects) {
-    console.log(packageName);
     execSync(
       generateCommand(
         'rollup',

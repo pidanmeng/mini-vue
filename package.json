@@ -9,7 +9,7 @@
   "scripts": {
     "test": "jest",
     "build": "node scripts/build.mjs",
-    "dev": "turbo run dev --parallel",
+    "dev": "rollup -c --environment TARGET:runtime-core --watch",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },

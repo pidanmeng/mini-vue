@@ -7,3 +7,6 @@ export const toRawType = (value: unknown): string =>
 
 export const isObject = (value: unknown): value is Record<any, any> =>
   value !== null && typeof value === 'object';
+
+export const hasOwn = (val: any, key: string) =>
+  Object.prototype.hasOwnProperty.call(val, key);
